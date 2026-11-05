@@ -15,12 +15,17 @@ for tool in pdftoppm gs; do
     command -v "$tool" >/dev/null || echo "warning: $tool not found (needed for PDF / PostScript jobs)" >&2
 done
 
+# Build from a copy so root does not leave build/ artifacts in the checkout.
+BUILD="$(mktemp -d)"
+trap 'rm -rf "$BUILD"' EXIT
+cp -r "$SRC/pyproject.toml" "$SRC/README.md" "$SRC/LICENSE" "$SRC/labelprinter" "$BUILD/"
+
 if command -v uv >/dev/null; then
     uv venv --quiet --allow-existing "$PREFIX"
-    uv pip install --quiet --python "$PREFIX/bin/python" --reinstall-package labelprinter "$SRC"
+    uv pip install --quiet --python "$PREFIX/bin/python" --reinstall-package labelprinter "$BUILD"
 else
     python3 -m venv "$PREFIX"
-    "$PREFIX/bin/pip" install --quiet --upgrade "$SRC"
+    "$PREFIX/bin/pip" install --quiet --upgrade "$BUILD"
 fi
 
 sed "s|@PREFIX@|$PREFIX|" "$SRC/contrib/cups/vc500w" > "$BACKEND_DIR/vc500w.tmp"
