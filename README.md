@@ -230,7 +230,7 @@ The file is created automatically on first run. You can edit it manually or use 
 ### Configuration Parameters
 
 **Printer Settings:**
-- `host` - Printer hostname or IP address (e.g., "VC-500W4188.local" or "192.168.1.100")
+- `host` - Printer hostname or IP address (e.g., "VC-500W4188.local" or "192.168.1.100") — also the default for `label-raw --host`
 - `label_width_mm` - Tape width in millimeters (12, 19, 25, 29, 38, 50)
 
 **Font Settings:**
@@ -246,7 +246,6 @@ The file is created automatically on first run. You can edit it manually or use 
 **Timeouts:**
 - `print_timeout` - Maximum seconds to wait for printing (default: 120); also the default for `label-raw --timeout`
 - `avahi_timeout` - Seconds to wait for mDNS resolution (default: 10)
-- `host` - also the default for `label-raw --host`
 
 **CUPS Queue Mode (Optional):**
 - `cups.enabled` - Set to `true` to enable queue mode, `false` for direct printing (default: false)
