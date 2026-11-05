@@ -12,7 +12,7 @@ SRC="$(cd "$(dirname "$0")/../.." && pwd)"
 BACKEND_DIR="$(cups-config --serverbin)/backend"
 
 for tool in pdftoppm gs; do
-    command -v "$tool" >/dev/null || echo "Warnung: $tool fehlt (für PDF bzw. PostScript nötig)" >&2
+    command -v "$tool" >/dev/null || echo "warning: $tool not found (needed for PDF / PostScript jobs)" >&2
 done
 
 if command -v uv >/dev/null; then
@@ -27,6 +27,6 @@ sed "s|@PREFIX@|$PREFIX|" "$SRC/contrib/cups/vc500w" > "$BACKEND_DIR/vc500w.tmp"
 chmod 0755 "$BACKEND_DIR/vc500w.tmp"
 mv "$BACKEND_DIR/vc500w.tmp" "$BACKEND_DIR/vc500w"
 
-echo "Backend installiert: $BACKEND_DIR/vc500w (Python in $PREFIX)"
-echo "Queue anlegen, z. B.:"
+echo "Installed backend: $BACKEND_DIR/vc500w (Python in $PREFIX)"
+echo "Create a queue, e.g.:"
 echo "  lpadmin -p VC500W -E -v 'vc500w://VC-500W1234.local/?mode=vivid&cut=full' -m raw"

@@ -58,6 +58,13 @@ WIDTH_TOLERANCE_MM = 1.5
 
 PRINT_TIMEOUT = 180
 
+# Nominal cassette widths (CZ-1001 ... CZ-1005); the printer reports inches.
+NOMINAL_WIDTHS_MM = (9, 12, 19, 25, 50)
+
+
+def nominal_width(tape_mm):
+    return min(NOMINAL_WIDTHS_MM, key=lambda w: abs(w - tape_mm))
+
 
 def log(level, message):
     """Write a message CUPS shows in the job/printer state."""
@@ -168,7 +175,7 @@ def prepare_label(page, tape_mm, settings, lpi, workdir, index):
             raise ValueError(
                 "label is %.1f x %.1f mm but a %d mm cassette is inserted "
                 "- insert the matching cassette or print with -o fit=1"
-                % (width_mm, height_mm, round(tape_mm))
+                % (width_mm, height_mm, nominal_width(tape_mm))
             )
         elif im.width > im.height:
             # fit=1: let the long side run along the tape

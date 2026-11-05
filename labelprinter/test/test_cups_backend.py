@@ -39,6 +39,13 @@ class TestParsing(unittest.TestCase):
             cb.resolve_settings({}, {"mode": "neon"})
 
 
+class TestNominalWidth(unittest.TestCase):
+    def test_reported_inches_map_to_cassette(self):
+        self.assertEqual(cb.nominal_width(2.0 * 25.4), 50)
+        self.assertEqual(cb.nominal_width(0.5 * 25.4), 12)
+        self.assertEqual(cb.nominal_width(0.35 * 25.4), 9)
+
+
 class TestPrepareLabel(unittest.TestCase):
     lpi = 317
     settings = {"mode": "vivid", "cut": "full", "fit": False}
@@ -73,7 +80,7 @@ class TestPrepareLabel(unittest.TestCase):
     def test_wrong_cassette_is_rejected(self):
         with self.assertRaises(ValueError) as ctx:
             self._prepare(self._page(210, 297), 50.8)
-        self.assertIn("51 mm cassette", str(ctx.exception))
+        self.assertIn("50 mm cassette", str(ctx.exception))
 
     def test_fit_allows_any_size(self):
         settings = dict(self.settings, fit=True)

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <!--
-  gLabels-Vorlagen für den Brother VC-500W (ZINK-Endlosband).
-  Breite = Bandbreite der Kassette, Höhe = Etikettenlänge.
-  Für Text längs zum Band im Dialog "Neues Etikett" die gedrehte
-  Ausrichtung wählen. Drucken über eine vc500w-Queue (contrib/cups).
-  Installieren: nach ~/.config/libglabels/templates/ kopieren.
+  gLabels templates for the Brother VC-500W (continuous ZINK tape).
+  Width = cassette tape width, height = label length.
+  For text running along the tape pick the rotated orientation in the
+  "New label" dialog. Print through a vc500w queue (contrib/cups).
+  Install: copy to ~/.config/libglabels/templates/
 -->
 <Glabels-templates>
   <Template brand="Brother" part="VC-500W 9x30" size="Other" width="9mm" height="30mm" description="VC-500W 9 mm × 30 mm (CZ-1001)">

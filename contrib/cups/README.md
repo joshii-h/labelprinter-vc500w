@@ -20,9 +20,9 @@ easiest way to pick it from a GUI print dialog (gLabels, GTK, Qt):
 
 ```sh
 HOST=VC-500W1234.local
-sudo lpadmin -p VC500W-Schnitt      -E -m raw -v "vc500w://$HOST/?mode=vivid&cut=full"
-sudo lpadmin -p VC500W-Anschnitt    -E -m raw -v "vc500w://$HOST/?mode=vivid&cut=half"
-sudo lpadmin -p VC500W-ohne-Schnitt -E -m raw -v "vc500w://$HOST/?mode=vivid&cut=none"
+sudo lpadmin -p VC500W-cut     -E -m raw -v "vc500w://$HOST/?mode=vivid&cut=full"
+sudo lpadmin -p VC500W-halfcut -E -m raw -v "vc500w://$HOST/?mode=vivid&cut=half"
+sudo lpadmin -p VC500W-nocut   -E -m raw -v "vc500w://$HOST/?mode=vivid&cut=none"
 ```
 
 | URI parameter | values | default |
@@ -32,7 +32,7 @@ sudo lpadmin -p VC500W-ohne-Schnitt -E -m raw -v "vc500w://$HOST/?mode=vivid&cut
 | `fit` | `1` = scale any page to the tape | off |
 
 On the command line, job options override the URI:
-`lp -d VC500W-Schnitt -o cut=half -o mode=normal label.pdf`
+`lp -d VC500W-cut -o cut=half -o mode=normal label.pdf`
 
 ## Behaviour
 
