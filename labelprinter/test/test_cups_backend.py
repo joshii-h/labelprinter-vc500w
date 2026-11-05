@@ -11,7 +11,7 @@ class TestParsing(unittest.TestCase):
     def test_parse_options(self):
         self.assertEqual(
             cb.parse_options("cut=half job-uuid=x noflag"),
-            {"cut": "half", "job-uuid": "x", "noflag": ""},
+            {"cut": "half", "job-uuid": "x", "noflag": "1"},
         )
         self.assertEqual(cb.parse_options(""), {})
 
@@ -89,6 +89,17 @@ class TestPrepareLabel(unittest.TestCase):
 
 
 class TestRenderPages(unittest.TestCase):
+    def test_image_keeps_its_dpi(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            src = os.path.join(tmp, "in.jpg")
+            Image.new("RGB", (591, 300), "red").save(src, dpi=(300, 300))
+            work = os.path.join(tmp, "work")
+            os.mkdir(work)
+            (page,) = cb.render_pages(src, work, 317)
+            with Image.open(page) as im:
+                width_mm, _ = cb.page_size_mm(im, 317)
+            self.assertAlmostEqual(width_mm, 50.0, delta=0.2)
+
     def test_image_becomes_single_page(self):
         with tempfile.TemporaryDirectory() as tmp:
             src = os.path.join(tmp, "in.jpg")

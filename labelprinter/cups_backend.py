@@ -34,6 +34,7 @@ Install: see contrib/cups/README.md
 
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -43,6 +44,7 @@ from PIL import Image
 
 from labelprinter.connection import Connection
 from labelprinter.printer import LabelPrinter
+from labelprinter.tape import nominal_width
 
 # CUPS backend exit codes (cups/backend.h)
 CUPS_BACKEND_OK = 0
@@ -58,13 +60,6 @@ WIDTH_TOLERANCE_MM = 1.5
 
 PRINT_TIMEOUT = 180
 
-# Nominal cassette widths (CZ-1001 ... CZ-1005); the printer reports inches.
-NOMINAL_WIDTHS_MM = (9, 12, 19, 25, 50)
-
-
-def nominal_width(tape_mm):
-    return min(NOMINAL_WIDTHS_MM, key=lambda w: abs(w - tape_mm))
-
 
 def log(level, message):
     """Write a message CUPS shows in the job/printer state."""
@@ -75,8 +70,9 @@ def parse_options(text):
     """Parse the CUPS options string 'a=b c=d flag' into a dict."""
     options = {}
     for item in (text or "").split():
-        key, _, value = item.partition("=")
-        options[key.lower()] = value
+        key, sep, value = item.partition("=")
+        # a bare flag like "-o fit" arrives without a value
+        options[key.lower()] = value if sep else "1"
     return options
 
 
@@ -142,7 +138,9 @@ def render_pages(source, workdir, lpi):
         with Image.open(source) as im:
             im.load()
             path = os.path.join(workdir, "page-001.png")
-            im.convert("RGB").save(path)
+            # keep the DPI, it decides the physical size of the label
+            dpi = im.info.get("dpi") or (lpi, lpi)
+            im.convert("RGB").save(path, dpi=dpi)
     pages = sorted(
         os.path.join(workdir, name)
         for name in os.listdir(workdir)
@@ -208,6 +206,9 @@ def run(argv, env):
 
     lpi = LPI[settings["mode"]]
     workdir = tempfile.mkdtemp(prefix="vc500w-", dir=env.get("TMPDIR"))
+    connection = None
+    # CUPS sends SIGTERM on cancel; exit through finally to clean up
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(CUPS_BACKEND_FAILED))
     try:
         if len(argv) == 7:
             source = argv[6]
@@ -218,13 +219,14 @@ def run(argv, env):
 
         try:
             pages = render_pages(source, workdir, lpi)
-        except (subprocess.CalledProcessError, OSError, ValueError) as e:
+        except Exception as e:  # noqa: BLE001 - any unreadable input, e.g. DecompressionBombError
             log("ERROR", "cannot read the job file: %s" % e)
             return CUPS_BACKEND_CANCEL
 
         log("STATE", "+connecting-to-device")
         try:
-            printer = LabelPrinter(Connection(host, port, PRINT_TIMEOUT))
+            connection = Connection(host, port, PRINT_TIMEOUT)
+            printer = LabelPrinter(connection)
         except (OSError, ValueError) as e:
             log("ERROR", "printer %s not reachable: %s" % (host, e))
             return CUPS_BACKEND_RETRY
@@ -268,6 +270,8 @@ def run(argv, env):
         log("ERROR", "printing failed: %s" % e)
         return CUPS_BACKEND_FAILED
     finally:
+        if connection is not None:
+            connection.close()
         shutil.rmtree(workdir, ignore_errors=True)
 
 
